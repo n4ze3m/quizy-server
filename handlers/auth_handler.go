@@ -2,9 +2,8 @@ package handlers
 
 import (
 	"context"
-	"log"
-	"time"
 	"os"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -70,9 +69,10 @@ func (h *AuthHandler) SignInHandler(c *gin.Context) {
 		return
 	}
 
-	log.Println(user)
+	// expiration time will be 7 days from now
+	// this is not a good method
+	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 
-	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &Claims{
 		ID: user.ID.Hex(),
 		StandardClaims: jwt.StandardClaims{
@@ -136,6 +136,7 @@ func (h *AuthHandler) SignUpHandler(c *gin.Context) {
 func (handler *AuthHandler) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenValue := ctx.Request.Header.Get("Authorization")
+		currentUser := &models.User{}
 		if tokenValue == "" {
 			ctx.JSON(401, gin.H{"error": "Missing token"})
 			ctx.Abort()
@@ -171,7 +172,8 @@ func (handler *AuthHandler) AuthMiddleware() gin.HandlerFunc {
 				ctx.Abort()
 				return
 			}
-			ctx.Set("user", user.Current)
+			user.Decode(currentUser)
+			ctx.Set("user", currentUser.ID.Hex())
 		} else {
 			ctx.JSON(401, gin.H{"error": "Invalid token"})
 			ctx.Abort()

@@ -47,6 +47,7 @@ func main() {
 	// Auth middleware for user routes
 	user := v1.Group("/user")
 	user.Use(authHandler.AuthMiddleware())
+	
 
 	router.Run()
 }
