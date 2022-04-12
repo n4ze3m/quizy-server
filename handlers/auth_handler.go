@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/n4ze3m/quizy-server/models"
 	"go.mongodb.org/mongo-driver/bson"
