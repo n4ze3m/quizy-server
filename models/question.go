@@ -10,9 +10,9 @@ import (
 
 type Quiz struct {
 	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id"`
-	Slug      string             `json:"slug" bson:"slug"`
+	Slug      string             `json:"-" bson:"slug"`
 	Title     string             `json:"title" bson:"title"`
-	UserID    string             `json:"user_id" bson:"user_id"`
+	UserID    string             `json:"-" bson:"user_id"`
 	Questions []Question         `json:"questions" bson:"questions"`
 	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 }
@@ -20,6 +20,7 @@ type Quiz struct {
 type Question struct {
 	ID       primitive.ObjectID `json:"_id" bson:"_id"`
 	Question string             `json:"question" bson:"question"`
+	Score    int                `json:"score" bson:"score"`
 	Options  []Options          `json:"options" bson:"options"`
 }
 
@@ -30,10 +31,12 @@ type Options struct {
 }
 
 func (q *Quiz) AllFalse() {
-	for _, question := range q.Questions {
-		for _, option := range question.Options {
+	for i, question := range q.Questions {
+		for j, option := range question.Options {
 			option.IsAnswer = false
+			q.Questions[i].Options[j] = option
 		}
+		q.Questions[i] = question
 	}
 }
 
@@ -51,6 +54,11 @@ func (q *Quiz) Validate() (bool, string) {
 
 		if strings.Trim(question.Question, " ") == "" {
 			return false, "Question is required"
+		}
+
+
+		if question.Score <= 0 || question.Score > 10 {
+			return false, "Score must be between 1 and 10"
 		}
 
 		if len(question.Options) == 0 {

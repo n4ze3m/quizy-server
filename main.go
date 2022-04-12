@@ -45,7 +45,8 @@ func main() {
 	// No auth middleware for public routes
 	v1.POST("/login", authHandler.SignInHandler)
 	v1.POST("/register", authHandler.SignUpHandler)
-
+	v1.GET("/quiz/:slug", quizHandler.GetQuizBySlugPublic)
+ 
 	// Auth middleware for user routes
 	user := v1.Group("/user")
 	user.Use(authHandler.AuthMiddleware())

@@ -67,3 +67,31 @@ func (q *QuizHandler) GetAllUserQuizHandler(c *gin.Context) {
 
 	c.JSON(200, gin.H{"quizzes": quizzes})
 }
+
+
+func (q *QuizHandler) GetQuizBySlugPublic(c *gin.Context) {
+	slug := c.Param("slug")
+
+	var quiz models.Quiz
+
+	cursor, err := q.collection.Find(q.ctx, bson.M{"slug": slug})
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !cursor.Next(q.ctx) {
+		c.JSON(404, gin.H{"error": "Quiz not found"})
+		return
+	}
+
+	if err := cursor.Decode(&quiz); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	quiz.AllFalse()
+
+	c.JSON(200, gin.H{"quiz": quiz})
+}
