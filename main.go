@@ -17,6 +17,7 @@ var ctx context.Context
 var err error
 var client *mongo.Client
 var authHandler *handlers.AuthHandler
+var quizHandler *handlers.QuizHandler
 
 func init() {
 	err = godotenv.Load()
@@ -32,8 +33,9 @@ func init() {
 	}
 
 	authHandler = handlers.NewAuthHandler(client.Database("quizy").Collection("users"), ctx)
+	quizHandler = handlers.NewQuizHandler(client.Database("quizy").Collection("quiz"), ctx)
 
-	log.Println("Connected to MongoDB!")
+	log.Println("Connected react-queryto MongoDB!")
 }
 
 func main() {
@@ -47,7 +49,10 @@ func main() {
 	// Auth middleware for user routes
 	user := v1.Group("/user")
 	user.Use(authHandler.AuthMiddleware())
-	
+	{
+		user.GET("/list", quizHandler.GetAllUserQuizHandler)
+		user.POST("/create", quizHandler.CreateQuizHandler)
+	}
 
 	router.Run()
 }
